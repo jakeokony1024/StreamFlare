@@ -1,92 +1,54 @@
-//
-// // Code  for mongoose config in backend
-// // Filename - backend/index.js
-//
-// // To connect with your mongoDB database
-// getting-started.js
-const mongoose = require('mongoose');
-const validator = require( 'validator');
-const { Schema } = mongoose;
-main().catch(err => console.log(err));
+// backend/index.js
 
-async function main() {
-    await mongoose.connect('mongodb://127.0.0.1:27017/StreamFlare');
-    // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
-    const userSchema = new Schema({
-        first_name: {
-            type: String,
-            required: true,
-        }, // String is shorthand for {type: String}
-        last_name: {
-            type: String,
-            required: true,
-        },
-        email: {
-            type: String,
-            required: true,
-            // validate: [validator.isEmail, 'Email is invalid'],
-        },
-        password: {
-            type: String,
-            required: true,
-            minlength: 8,
-            // validate: {}
-        },
-        created_at: { type: Date, default: Date.now },
-    });
-}
-//
-// // Schema for users of app
-// const UserSchema = new mongoose.Schema({
-//     name: {
-//         type: String,
-//         required: true,
-//     },
-//     email: {
-//         type: String,
-//         required: true,
-//         unique: true,
-//     },
-//     date: {
-//         type: Date,
-//         default: Date.now,
-//     },
-// });
-// const User = mongoose.model('users', UserSchema);
-// User.createIndexes();
-//
-// // For backend and express
-// const express = require('express');
-// const app = express();
-// const cors = require("cors");
-// console.log("App listen at port 5000");
-// app.use(express.json());
-// app.use(cors());
-// app.get("/", (req, resp) => {
-//
-//     resp.send("App is Working");
-//     // You can check backend is working or not by
-//     // entering http://loacalhost:5000
-//
-//     // If you see App is working means
-//     // backend working properly
-// });
-//
-// app.post("/register", async (req, resp) => {
-//     try {
-//         const user = new User(req.body);
-//         let result = await user.save();
-//         result = result.toObject();
-//         if (result) {
-//             delete result.password;
-//             resp.send(req.body);
-//             console.log(result);
-//         } else {
-//             console.log("User already register");
-//         }
-//
-//     } catch (e) {
-//         resp.send("Something Went Wrong");
-//     }
-// });
-// app.listen(5000);
+const express = require('express');
+const mongoose = require('mongoose');
+const User = require('./models/User'); // Import User model
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// MongoDB connection
+mongoose.connect('mongodb://127.0.0.1:27017/StreamFlare', { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((err) => console.log('MongoDB connection error:', err));
+
+// User registration route
+app.post('/register', async (req, res) => {
+    const { first_name, last_name, email, password } = req.body;
+    try {
+        const userExists = await User.findOne({ email });
+        if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+        const newUser = new User({ first_name, last_name, email, password });
+        await newUser.save();
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error registering user', error: err });
+    }
+});
+
+// User login route
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const isPasswordValid = await user.matchPassword(password);
+        if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
+
+        const token = jwt.sign({ userId: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.json({ token });
+    } catch (err) {
+        res.status(500).json({ message: 'Login error', error: err });
+    }
+});
+
+// Server listening
+app.listen(5000, () => {
+    console.log("Server running on port 5000");
+});
