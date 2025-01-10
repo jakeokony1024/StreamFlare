@@ -11,14 +11,14 @@ export const AuthProvider = ({ children }) => {
         // Check localStorage for a stored JWT token
         const token = localStorage.getItem('token');
         if (token) {
-            // You can fetch user info here if needed
+            // Set user based on the token
             setUser({ token });
         }
     }, []);
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:3000/login', { email, password });
+            const response = await axios.post('http://localhost:5001/login', { email, password });
             localStorage.setItem('token', response.data.token); // Store JWT in localStorage
             setUser({ token: response.data.token });
         } catch (err) {
@@ -28,8 +28,9 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (first_name, last_name, email, password) => {
         try {
-            await axios.post('http://localhost:3000/register', { first_name, last_name, email, password });
-            await login(email, password); // Auto-login after registration
+            const response = await axios.post('http://localhost:5001/register', { first_name, last_name, email, password });
+            localStorage.setItem('token', response.data.token); // Store JWT in localStorage after registration
+            setUser({ token: response.data.token }); // Set user state with the token
         } catch (err) {
             console.error('Registration failed', err);
         }

@@ -1,15 +1,19 @@
 // backend/index.js
-
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const User = require('./models/User'); // Import User model
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-
 const app = express();
+const JWT_SECRET = process.env.JWT_SECRET;
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // Your frontend URL
+    methods: ['GET', 'POST'],
+    credentials: true,
+}));
 
 // MongoDB connection
 mongoose.connect('mongodb://127.0.0.1:27017/StreamFlare', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -21,11 +25,16 @@ app.post('/register', async (req, res) => {
     const { first_name, last_name, email, password } = req.body;
     try {
         const userExists = await User.findOne({ email });
+        const createdAt = new Date();
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-        const newUser = new User({ first_name, last_name, email, password });
+        const newUser = new User({ first_name, last_name, email, password, createdAt });
         await newUser.save();
-        res.status(201).json({ message: 'User registered successfully' });
+
+        // Generate JWT token after successful registration
+        const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(201).json({ token }); // Return token in response
     } catch (err) {
         res.status(500).json({ message: 'Error registering user', error: err });
     }
@@ -49,6 +58,6 @@ app.post('/login', async (req, res) => {
 });
 
 // Server listening
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
+app.listen(5001, () => {
+    console.log("Server running on port 5001");
 });
