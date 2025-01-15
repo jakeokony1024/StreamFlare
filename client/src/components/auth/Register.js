@@ -1,7 +1,7 @@
 // frontend/src/components/Register.js
 import React, { useState, useContext } from 'react';
 import AuthContext from '../../context/AuthContext';
-import MainLayout from "../layouts/MainLayout";
+import AuthLayout from "../layouts/AuthLayout";
 
 const Register = () => {
     const [first_name, setFirstName] = useState('');
@@ -12,13 +12,14 @@ const Register = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        register(first_name, last_name, email, password);
+        register(first_name, last_name, email, password, Date.now());
     };
 
     return (
-        <MainLayout>
-            <form onSubmit={handleSubmit}>
+        <AuthLayout>
+            <form onSubmit={handleSubmit} id="register-form">
                 <input
+                    className="form-input"
                     type="text"
                     value={first_name}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -26,6 +27,7 @@ const Register = () => {
                     required
                 />
                 <input
+                    className="form-input"
                     type="text"
                     value={last_name}
                     onChange={(e) => setLastName(e.target.value)}
@@ -33,6 +35,7 @@ const Register = () => {
                     required
                 />
                 <input
+                    className="form-input"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -40,6 +43,7 @@ const Register = () => {
                     required
                 />
                 <input
+                    className="form-input"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -48,7 +52,7 @@ const Register = () => {
                 />
                 <button type="submit">Register</button>
             </form>
-        </MainLayout>
+        </AuthLayout>
     );
 };
 

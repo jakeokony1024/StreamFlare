@@ -22,10 +22,9 @@ mongoose.connect('mongodb://127.0.0.1:27017/StreamFlare', { useNewUrlParser: tru
 
 // User registration route
 app.post('/register', async (req, res) => {
-    const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email, password, createdAt } = req.body;
     try {
         const userExists = await User.findOne({ email });
-        const createdAt = new Date();
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
         const newUser = new User({ first_name, last_name, email, password, createdAt });

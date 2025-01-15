@@ -26,9 +26,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (first_name, last_name, email, password) => {
+    const register = async (first_name, last_name, email, password, createdAt) => {
         try {
-            const response = await axios.post('http://localhost:5001/register', { first_name, last_name, email, password });
+            const response = await axios.post('http://localhost:5001/register', {
+                first_name,
+                last_name,
+                email,
+                password,
+                createdAt
+            });
             localStorage.setItem('token', response.data.token); // Store JWT in localStorage after registration
             setUser({ token: response.data.token }); // Set user state with the token
         } catch (err) {

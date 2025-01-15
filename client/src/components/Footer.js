@@ -1,11 +1,11 @@
 const Footer = () => {
     return  (
         <div id="footer">
-            <div className="footer-container">
-                <div className="footer-left">
+            <div className="nav-container">
+                <div className="nav-links">
                     <a href='#'>Here is a link</a>
                 </div>
-                <div className="footer-right">
+                <div className="nav-links">
                     <a href='#'>Here is another link</a>
                 </div>
             </div>
