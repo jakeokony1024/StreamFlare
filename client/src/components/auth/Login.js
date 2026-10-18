@@ -7,6 +7,7 @@ import '../../App.css';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const { login } = useContext(AuthContext);
 
@@ -41,15 +42,26 @@ const Login = () => {
                         required
                     />
                     <label htmlFor="login-password">Password</label>
-                    <input
-                        id="login-password"
-                        type="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter your password"
-                        required
-                    />
+                    <div className="password-input-wrap">
+                        <input
+                            id="login-password"
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            required
+                        />
+                        <button
+                            className="password-visibility-toggle"
+                            type="button"
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showPassword}
+                            onClick={() => setShowPassword((visible) => !visible)}
+                        >
+                            {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                    </div>
                     {error && <p className="login-error" role="alert">{error}</p>}
                     <button type="submit">Sign in <span aria-hidden="true">→</span></button>
                 </form>

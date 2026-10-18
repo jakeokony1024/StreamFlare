@@ -169,6 +169,39 @@
   box-shadow: 0 0 0 3px rgba(103, 65, 141, .16);
 }
 
+.password-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.login-form .password-input-wrap input {
+  padding-right: 4.5rem;
+}
+
+.login-form .password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: .45rem;
+  display: inline-flex;
+  width: auto;
+  margin: 0;
+  padding: .45rem .55rem;
+  transform: translateY(-50%);
+  border-radius: .5rem;
+  background: transparent;
+  color: #604578;
+  font-size: .78rem;
+  font-weight: 800;
+  box-shadow: none;
+}
+
+.login-form .password-visibility-toggle:hover {
+  transform: translateY(-50%);
+  background: rgba(70, 42, 96, .08);
+  filter: none;
+  box-shadow: none;
+}
+
 .login-error {
   margin: .35rem 0 0;
   color: #8b2837;

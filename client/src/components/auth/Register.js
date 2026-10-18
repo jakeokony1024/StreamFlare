@@ -8,6 +8,7 @@ const Register = () => {
     const [last_name, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const { register } = useContext(AuthContext);
 
@@ -65,17 +66,28 @@ const Register = () => {
                         required
                     />
                     <label htmlFor="register-password">Password</label>
-                    <input
-                        id="register-password"
-                        type="password"
-                        autoComplete="new-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="At least 8 characters"
-                        minLength={8}
-                        maxLength={72}
-                        required
-                    />
+                    <div className="password-input-wrap">
+                        <input
+                            id="register-password"
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="new-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="At least 8 characters"
+                            minLength={8}
+                            maxLength={72}
+                            required
+                        />
+                        <button
+                            className="password-visibility-toggle"
+                            type="button"
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showPassword}
+                            onClick={() => setShowPassword((visible) => !visible)}
+                        >
+                            {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                    </div>
                     {error && <p className="login-error" role="alert">{error}</p>}
                     <button type="submit">Create account <span aria-hidden="true">→</span></button>
                 </form>
