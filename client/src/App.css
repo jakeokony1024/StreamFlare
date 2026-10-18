@@ -52,7 +52,8 @@
   isolation: isolate;
   display: grid;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   place-items: center;
   padding: 2rem 1.25rem;
   box-sizing: border-box;
