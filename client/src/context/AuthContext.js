@@ -1,50 +1,46 @@
-// frontend/src/context/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+const api = axios.create({ baseURL: API_URL, withCredentials: true });
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        // Check localStorage for a stored JWT token
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Set user based on the token
-            setUser({ token });
-        }
+        let active = true;
+        api.get('/auth/me')
+            .then(({ data }) => { if (active) setUser(data.user); })
+            .catch(() => { if (active) setUser(null); });
+        return () => { active = false; };
     }, []);
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:5001/login', { email, password });
-            localStorage.setItem('token', response.data.token); // Store JWT in localStorage
-            setUser({ token: response.data.token });
+            const { data } = await api.post('/login', { email, password });
+            setUser(data.user);
         } catch (err) {
             console.error('Login failed', err);
+            throw err;
         }
     };
 
-    const register = async (first_name, last_name, email, password, createdAt) => {
+    const register = async (first_name, last_name, email, password) => {
         try {
-            const response = await axios.post('http://localhost:5001/register', {
-                first_name,
-                last_name,
-                email,
-                password,
-                createdAt
-            });
-            localStorage.setItem('token', response.data.token); // Store JWT in localStorage after registration
-            setUser({ token: response.data.token }); // Set user state with the token
+            const { data } = await api.post('/register', { first_name, last_name, email, password });
+            setUser(data.user);
         } catch (err) {
             console.error('Registration failed', err);
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
+    const logout = async () => {
+        try {
+            await api.post('/logout');
+        } finally {
+            setUser(null);
+        }
     };
 
     return (
