@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 72" role="img" aria-labelledby="title">
+  <title id="title">TMDB</title>
+  <rect x="4" y="8" width="56" height="56" rx="12" fill="#01b4e4" />
+  <path d="M17 23h30v7H36v26h-8V30H17z" fill="#0d253f" />
+  <text x="72" y="52" fill="#0d253f" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="-2">TMDB</text>
+</svg>
