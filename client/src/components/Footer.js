@@ -1,16 +1,15 @@
-const Footer = () => {
-    return  (
-        <div id="footer">
-            <div className="nav-container">
-                <div className="nav-links">
-                    <a href='#'>Here is a link</a>
-                </div>
-                <div className="nav-links">
-                    <a href='#'>Here is another link</a>
-                </div>
-            </div>
-        </div>
-    );
+function Footer() {
+  return (
+    <footer className="credits" aria-label="About the data">
+      <div className="credits-copy">
+        <p>Streaming availability provided by JustWatch.</p>
+        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      </div>
+      <a className="tmdb-credit" href="https://www.themoviedb.org" target="_blank" rel="noreferrer" aria-label="The Movie Database">
+        <img src="https://www.themoviedb.org/assets/2/v4/logos/stacked-blue.svg" alt="The Movie Database" />
+      </a>
+    </footer>
+  );
 }
 
 export default Footer;
