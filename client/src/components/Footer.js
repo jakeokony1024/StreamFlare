@@ -1,3 +1,5 @@
+import tmdbLogo from '../assets/tmdb-logo.svg';
+
 function Footer() {
   return (
     <footer className="credits" aria-label="About the data">
@@ -6,7 +8,7 @@ function Footer() {
         <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
       </div>
       <a className="tmdb-credit" href="https://www.themoviedb.org" target="_blank" rel="noreferrer" aria-label="The Movie Database">
-        <img src="https://www.themoviedb.org/assets/2/v4/logos/stacked-blue.svg" alt="The Movie Database" />
+        <img src={tmdbLogo} alt="The Movie Database" />
       </a>
     </footer>
   );
