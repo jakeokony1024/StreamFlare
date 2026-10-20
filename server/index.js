@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const User = require('./models/User');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const { findShows } = require('./services/tmdb');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5001;
@@ -18,10 +19,6 @@ const cookieOptions = {
     sameSite: 'lax',
     path: '/',
 };
-
-if (!JWT_SECRET || JWT_SECRET.length < 32) {
-    throw new Error('JWT_SECRET must be set to a random value at least 32 characters long');
-}
 
 app.disable('x-powered-by');
 app.use((req, res, next) => {
@@ -46,6 +43,8 @@ const attempts = new Map();
 const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const AUTH_MAX_ATTEMPTS = 10;
 function authRateLimit(req, res, next) {
+    if (!isProduction && process.env.DISABLE_AUTH_RATE_LIMIT === 'true') return next();
+
     const now = Date.now();
     const key = req.ip;
     let entry = attempts.get(key);
@@ -95,6 +94,9 @@ async function findSessionUser(req) {
 }
 
 app.post('/register', rejectBadOrigin, authRateLimit, async (req, res) => {
+    if (!JWT_SECRET || JWT_SECRET.length < 32) {
+        return res.status(503).json({ message: 'Accounts are not configured on this server yet.' });
+    }
     const { first_name, last_name, email, password } = req.body || {};
     if (![first_name, last_name, email, password].every((value) => typeof value === 'string') ||
         first_name.trim().length < 1 || first_name.length > 100 ||
@@ -106,7 +108,7 @@ app.post('/register', rejectBadOrigin, authRateLimit, async (req, res) => {
     try {
         const normalizedEmail = email.trim().toLowerCase();
         const userExists = await User.findOne({ email: normalizedEmail });
-        if (userExists) return res.status(409).json({ message: 'Unable to register with those details' });
+        if (userExists) return res.status(409).json({ message: 'An account with this email already exists.' });
 
         const user = await User.create({
             first_name: first_name.trim(),
@@ -117,7 +119,7 @@ app.post('/register', rejectBadOrigin, authRateLimit, async (req, res) => {
         setSessionCookie(res, user._id.toString());
         res.status(201).json({ user: { id: user._id, first_name: user.first_name, last_name: user.last_name, email: user.email } });
     } catch (err) {
-        if (err && err.code === 11000) return res.status(409).json({ message: 'Unable to register with those details' });
+        if (err && err.code === 11000) return res.status(409).json({ message: 'An account with this email already exists.' });
         if (err && err.name === 'ValidationError') return res.status(400).json({ message: 'Please provide valid registration details' });
         console.error('Registration failed:', err);
         res.status(500).json({ message: 'Registration failed' });
@@ -125,6 +127,9 @@ app.post('/register', rejectBadOrigin, authRateLimit, async (req, res) => {
 });
 
 app.post('/login', rejectBadOrigin, authRateLimit, async (req, res) => {
+    if (!JWT_SECRET || JWT_SECRET.length < 32) {
+        return res.status(503).json({ message: 'Accounts are not configured on this server yet.' });
+    }
     const { email, password } = req.body || {};
     if (typeof email !== 'string' || typeof password !== 'string' || email.length > 254 || password.length > 72) {
         return res.status(400).json({ message: 'Invalid email or password' });
@@ -139,6 +144,19 @@ app.post('/login', rejectBadOrigin, authRateLimit, async (req, res) => {
     } catch (err) {
         console.error('Login failed:', err);
         res.status(500).json({ message: 'Login failed' });
+    }
+});
+
+app.get('/api/shows', async (req, res) => {
+    try {
+        const data = await findShows({ region: req.query.region, query: req.query.q });
+        res.json(data);
+    } catch (err) {
+        if (err.status === 400 || err.status === 503 || err.status === 502) {
+            return res.status(err.status).json({ message: err.message });
+        }
+        console.error('Show lookup failed:', err);
+        res.status(503).json({ message: 'Could not load streaming data right now. Please try again.' });
     }
 });
 
@@ -158,7 +176,7 @@ if (require.main === module) {
         .then(() => console.log('Connected to MongoDB'))
         .catch((err) => {
             console.error('MongoDB connection failed:', err.message);
-            process.exitCode = 1;
+            console.error('Show discovery can continue, but account features need MongoDB.');
         });
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
